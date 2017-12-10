@@ -55,7 +55,7 @@ def start(bot, update):
     reply_markup = ReplyKeyboardMarkup(custom_keyboard)
     bot.send_message(
         chat_id=update.message.chat_id,
-        text="Hallo Welt!",
+        text="Hallo, ich kann dir das Wetter und den Vertretungsplan der FCSO zeigen. Grüße von Moritz",
         reply_markup=reply_markup)
 
 
