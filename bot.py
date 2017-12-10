@@ -1,3 +1,4 @@
+from telegram import ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler
 from telegram.ext import MessageHandler, Filters
 
@@ -46,7 +47,16 @@ def get_wetter(stadt):
 
 
 def start(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Hallo Welt!")
+    custom_keyboard = [
+        ["/start"],
+        ["/plan"],
+        ["emden", "veenhusen"],
+    ]
+    reply_markup = ReplyKeyboardMarkup(custom_keyboard)
+    bot.send_message(
+        chat_id=update.message.chat_id,
+        text="Hallo Welt!",
+        reply_markup=reply_markup)
 
 
 def echo(bot, update):
@@ -56,14 +66,15 @@ def echo(bot, update):
 
 
 def vertretungsplan(bot, update):
-    chat_id = update.massage.chat_id
-    print('Test')
-    bot.send_photo(chat_id=chat_id, photo='https://fcso-schule.de/idesk/infodisplay/img.php?pdf=1eac696ba2025e9045852bc51e722ea4-1&width=606&height=85')
+    chat_id = update.message.chat_id
+    bot.send_photo(chat_id=chat_id,
+                   photo='https://fcso-schule.de/idesk/infodisplay/img.php?pdf=1eac696ba2025e9045852bc51e722ea4-1&width=606&height=800')
+
 
 handler = CommandHandler('start', start)
 dispatcher.add_handler(handler)
 
-handler = CommandHandler('abc', vertretungsplan)
+handler = CommandHandler('plan', vertretungsplan)
 dispatcher.add_handler(handler)
 
 handler = MessageHandler(Filters.text, echo)
