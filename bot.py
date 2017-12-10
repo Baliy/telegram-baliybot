@@ -9,7 +9,10 @@ dispatcher = updater.dispatcher
 symbole = {
     'Sun': '☀️',
     'Rain': '🌧',
+    'Snow': '❄️',
+    'Rain And Snow': '❄️🌧',
     'Showers': '🌦',
+    'Scattered Showers': '🌦',
     'Partly Cloudy': '🌤',
     'Mostly Cloudy': '⛅️',
     'sturmisch': '💨',
