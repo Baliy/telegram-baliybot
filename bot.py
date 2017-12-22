@@ -39,7 +39,7 @@ def get_wetter(stadt):
         min = to_cel(forecast.low())
         max = to_cel(forecast.high())
 
-        text += f"{datum} \n{wetter}\n max:{max}C° min:{min}C°\n\n"
+        text += "%s \n%s\n max:%sC° min:%sC°\n\n" % (datum, wetter, max, min)
         # print(forecast.date())
         # print(forecast.high())
         # print(forecast.low())
