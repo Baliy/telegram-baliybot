@@ -1,7 +1,9 @@
 import datetime
+import traceback
+
 from telegram import ReplyKeyboardMarkup
-from telegram.ext import Updater, CommandHandler
 from telegram.ext import MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler
 from tinydb import TinyDB
 
 token = '485681211:AAEmirKpeyBWkXImfBVwy-m4rmH5MDjOcqo'
@@ -23,6 +25,15 @@ symbole = {
     'sturmisch': '💨',
     'Cloudy': '☁️'
 }
+
+
+def log_error(f):
+    def log(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except:
+            traceback.print_exc()
+    return log
 
 
 def log_command(bot, update):
@@ -63,6 +74,7 @@ def get_wetter(stadt):
     return text
 
 
+@log_error
 def start(bot, update):
     log_command(bot, update)
     custom_keyboard = [
@@ -77,6 +89,7 @@ def start(bot, update):
         reply_markup=reply_markup)
 
 
+@log_error
 def echo(bot, update):
     log_command(bot, update)
     stadt = update.message.text
@@ -118,12 +131,14 @@ def urls_vertretungsplan():
     return urls
 
 
+@log_error
 def vertretungsplan(bot, update):
     log_command(bot, update)
     chat_id = update.message.chat_id
     for url in urls_vertretungsplan():
         bot.send_photo(chat_id=chat_id,
-                       photo=url+'&date=%s' % datetime.datetime.now().isoformat())
+                       photo=url + '&date=%s' % datetime.datetime.now().isoformat())
+
 
 handler = CommandHandler('start', start)
 dispatcher.add_handler(handler)
