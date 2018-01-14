@@ -1,11 +1,15 @@
+import datetime
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler
 from telegram.ext import MessageHandler, Filters
+from tinydb import TinyDB
 
 token = '485681211:AAEmirKpeyBWkXImfBVwy-m4rmH5MDjOcqo'
 
 updater = Updater(token=token)
 dispatcher = updater.dispatcher
+
+db = TinyDB('./db.json')
 
 symbole = {
     'Sun': '☀️',
@@ -19,6 +23,19 @@ symbole = {
     'sturmisch': '💨',
     'Cloudy': '☁️'
 }
+
+
+def log_command(bot, update):
+    user = update.message.from_user.username
+    command = update.message.text
+    date = update.message.date.strftime("%Y-%m-%d %H:%M:%S")
+
+    print("%s %s: %s" % (date, user, command))
+    db.insert(dict(
+        user=user,
+        date=date,
+        command=command
+    ))
 
 
 def to_cel(f):
@@ -47,6 +64,7 @@ def get_wetter(stadt):
 
 
 def start(bot, update):
+    log_command(bot, update)
     custom_keyboard = [
         ["/start"],
         ["/plan"],
@@ -60,16 +78,52 @@ def start(bot, update):
 
 
 def echo(bot, update):
+    log_command(bot, update)
     stadt = update.message.text
     wetter = get_wetter(stadt)
     bot.send_message(chat_id=update.message.chat_id, text=wetter)
 
 
-def vertretungsplan(bot, update):
-    chat_id = update.message.chat_id
-    bot.send_photo(chat_id=chat_id,
-                   photo='https://fcso-schule.de/idesk/infodisplay/img.php?pdf=1eac696ba2025e9045852bc51e722ea4-1&width=606&height=800')
+def urls_vertretungsplan():
+    from lxml import html
+    import requests
+    from lxml.cssselect import CSSSelector
 
+    # Öffne Homepage
+    page = requests.get('https://www.fcso.de/ueber-die-fcso/vertretungsplan.html')
+    tree = html.fromstring(page.content)
+
+    ## Lese erstes iFrame
+    sel = CSSSelector('iframe')
+    iframe1 = sel(tree)[0]
+
+    # Öffne iFrame
+    page = requests.get(iframe1.get('src'))
+    tree = html.fromstring(page.content)
+
+    iframe2 = sel(tree)[0]
+    url = 'https://fcso-schule.de/idesk/infodisplay/' + iframe2.get('src')
+
+    # Öffne PDF Seite
+    page = requests.get(url)
+    tree = html.fromstring(page.content)
+
+    img_sel = CSSSelector('img')
+
+    urls = []
+    for img in img_sel(tree):
+        img_id = img.get('alt')
+        img_url = 'https://fcso-schule.de/idesk/infodisplay/img.php?pdf=' + img_id + '&width=606&height=800'
+        urls.append(img_url)
+    return urls
+
+
+def vertretungsplan(bot, update):
+    log_command(bot, update)
+    chat_id = update.message.chat_id
+    for url in urls_vertretungsplan():
+        bot.send_photo(chat_id=chat_id,
+                       photo=url+'&date=%s' % datetime.datetime.now().isoformat())
 
 handler = CommandHandler('start', start)
 dispatcher.add_handler(handler)
