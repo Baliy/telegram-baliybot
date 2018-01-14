@@ -1,7 +1,7 @@
 import datetime
 import traceback
 
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, ChatAction
 from telegram.ext import MessageHandler, Filters
 from telegram.ext import Updater, CommandHandler
 from tinydb import TinyDB
@@ -37,6 +37,8 @@ def log_error(f):
 
 
 def log_command(bot, update):
+    bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.TYPING)
+
     user = update.message.from_user.username
     command = update.message.text
     date = update.message.date.strftime("%Y-%m-%d %H:%M:%S")
