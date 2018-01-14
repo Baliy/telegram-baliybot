@@ -1,6 +1,9 @@
 import datetime
 import traceback
 
+import requests
+from lxml import html
+from lxml.cssselect import CSSSelector
 from telegram import ReplyKeyboardMarkup, ChatAction
 from telegram.ext import MessageHandler, Filters
 from telegram.ext import Updater, CommandHandler
@@ -33,6 +36,7 @@ def log_error(f):
             return f(*args, **kwargs)
         except:
             traceback.print_exc()
+
     return log
 
 
@@ -100,10 +104,6 @@ def echo(bot, update):
 
 
 def urls_vertretungsplan():
-    from lxml import html
-    import requests
-    from lxml.cssselect import CSSSelector
-
     # Öffne Homepage
     page = requests.get('https://www.fcso.de/ueber-die-fcso/vertretungsplan.html')
     tree = html.fromstring(page.content)
@@ -137,6 +137,7 @@ def urls_vertretungsplan():
 def vertretungsplan(bot, update):
     log_command(bot, update)
     chat_id = update.message.chat_id
+    bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     for url in urls_vertretungsplan():
         bot.send_photo(chat_id=chat_id,
                        photo=url + '&date=%s' % datetime.datetime.now().isoformat())
